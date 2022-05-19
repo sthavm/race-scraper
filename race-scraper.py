@@ -10,6 +10,7 @@ import os
 
 RACE_RESULTS_URL = "https://racing.hkjc.com/racing/information/english/Racing/LocalResults.aspx?Racecourse=HV"
 CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
+GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN")
 app = Flask(__name__)
 
 @app.route("/race-results")
@@ -30,6 +31,7 @@ def get_race_results(race_date, race_no):
     options = Options()
     options.add_argument("--headless")
     options.add_argument('--disable-gpu')
+    options.binary_location = GOOGLE_CHROME_BIN
     driver = webdriver.Chrome(executable_path =CHROMEDRIVER_PATH, options=options)
     driver.get(specific_url)
     try:
