@@ -26,7 +26,10 @@ def return_race_results():
     results_dict = {"dividend_table":race_results, "profit":profit}
     return jsonify(results_dict), 200
 
-
+@app.route("/")
+def home():
+    return "<h2>Hello</h2>"
+    
 def get_race_results(race_date, race_no):
     specific_url = RACE_RESULTS_URL + '&RaceDate='+ str(race_date) + '&RaceNo='+str(race_no)
     options = Options()
