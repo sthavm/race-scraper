@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,6 +13,8 @@ RACE_RESULTS_URL = "https://racing.hkjc.com/racing/information/english/Racing/Lo
 CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
 GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN")
 app = Flask(__name__)
+
+CORS(app)
 
 @app.route("/race-results")
 def return_race_results():
