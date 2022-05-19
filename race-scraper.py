@@ -18,12 +18,13 @@ def return_race_results():
     race_date = request.args.get('race-date')
     race_no = request.args.get('race-no')
     race_results = get_race_results(race_date, race_no)
-    profit = calculate_profit(race_results)
     if race_results == 'date invalid':
         return 'date invalid', 204
     elif race_results == 'race invalid':
         return 'race invalid', 204
-    return jsonify(race_results), 200
+    profit = calculate_profit(race_results)
+    results_dict = {"dividend_table":race_results, "profit":profit}
+    return jsonify(results_dict), 200
 
 
 def get_race_results(race_date, race_no):
