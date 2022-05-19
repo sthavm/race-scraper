@@ -154,4 +154,5 @@ def calculate_quinella_place_profits(quinella_place_bets, quinella_place_dividen
     return bet_profits
     
 
-print(calculate_profit(get_race_results('2021/12/08',2)))
+if __name__ == "__main__":
+  app.run()
