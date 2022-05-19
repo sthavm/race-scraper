@@ -5,8 +5,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import json
+import os
 
 RACE_RESULTS_URL = "https://racing.hkjc.com/racing/information/english/Racing/LocalResults.aspx?Racecourse=HV"
+CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
 app = Flask(__name__)
 
 @app.route("/race-results")
@@ -14,6 +17,7 @@ def return_race_results():
     race_date = request.args.get('race-date')
     race_no = request.args.get('race-no')
     race_results = get_race_results(race_date, race_no)
+    profit = calculate_profit(race_results)
     if race_results == 'date invalid':
         return 'date invalid', 204
     elif race_results == 'race invalid':
@@ -26,7 +30,7 @@ def get_race_results(race_date, race_no):
     options = Options()
     options.add_argument("--headless")
     options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(executable_path = './chromedriver', options=options)
+    driver = webdriver.Chrome(executable_path =CHROMEDRIVER_PATH, options=options)
     driver.get(specific_url)
     try:
         element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "commContent")))
@@ -104,6 +108,48 @@ def extract_dividend_data(table):
 
     return results_and_dividends
 
+def calculate_profit(results_and_dividends):
+    f = open('bet-list.json')
+    bets = json.load(f)["bets"]
+    quinella_profits = calculate_quinella_profits(bets["qin"], results_and_dividends["quinella"])
+    quinella_place_profits = calculate_quinella_place_profits(bets["qpl"], results_and_dividends["quinella-place"])
+    return quinella_profits+quinella_place_profits
+
+def calculate_quinella_profits(quinella_bets, quinella_dividends):
+    quinella_win_configurations = (quinella_dividends[0], quinella_dividends[0].split(',')[1]+','+quinella_dividends[0].split(',')[0])
+
+    bet_profits = []
+
+    for bet in quinella_bets:
+        bet_profit = {"bet_type": "quinella", "combination":bet, "amount":quinella_bets[bet]}
+        if (quinella_win_configurations[0] == bet or quinella_win_configurations[1] == bet):
+            bet_profit["dividend"] = float(quinella_dividends[1])
+            bet_profit["profit"] = (bet_profit["amount"]/10) * bet_profit["dividend"] - bet_profit["amount"]
+        else:
+            bet_profit["dividend"] = 0
+            bet_profit["profit"] = -1 * bet_profit["amount"]
+        bet_profits.append(bet_profit)
+    return bet_profits
 
 
-print(get_race_results('2021/12/08',2))
+def calculate_quinella_place_profits(quinella_place_bets, quinella_place_dividends):
+    quinella_place_win_configurations = []
+    for dividend in quinella_place_dividends:
+        quinella_place_win_configurations.append({dividend[0]:dividend[1]})
+        quinella_place_win_configurations.append({dividend[0].split(',')[1]+','+dividend[0].split(',')[0]:dividend[1]})
+
+
+    bet_profits = []
+    for bet in quinella_place_bets:
+        bet_profit = {"bet_type": "quinella-place", "combination":bet, "amount":quinella_place_bets[bet]}
+        if bet in quinella_place_win_configurations:
+            bet_profit["dividend"] = float(quinella_place_win_configurations[bet])
+            bet_profit["profit"] = (bet_profit["amount"]/10) * bet_profit["dividend"] - bet_profit["amount"]
+        else:
+            bet_profit["dividend"] = 0
+            bet_profit["profit"] = -1 * bet_profit["amount"]
+        bet_profits.append(bet_profit)
+    return bet_profits
+    
+
+print(calculate_profit(get_race_results('2021/12/08',2)))
