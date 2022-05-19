@@ -29,12 +29,14 @@ def return_race_results():
 @app.route("/")
 def home():
     return "<h2>Hello</h2>"
-    
+
 def get_race_results(race_date, race_no):
     specific_url = RACE_RESULTS_URL + '&RaceDate='+ str(race_date) + '&RaceNo='+str(race_no)
     options = Options()
     options.add_argument("--headless")
     options.add_argument('--disable-gpu')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--no-sandbox')
     options.binary_location = GOOGLE_CHROME_BIN
     driver = webdriver.Chrome(executable_path =CHROMEDRIVER_PATH, options=options)
     driver.get(specific_url)
