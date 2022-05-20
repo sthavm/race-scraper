@@ -144,17 +144,16 @@ def calculate_quinella_profits(quinella_bets, quinella_dividends):
 
 
 def calculate_quinella_place_profits(quinella_place_bets, quinella_place_dividends):
-    quinella_place_win_configurations = []
+    quinella_place_win_configurations = {}
     for dividend in quinella_place_dividends:
-        quinella_place_win_configurations.append({dividend[0]:dividend[1]})
-        quinella_place_win_configurations.append({dividend[0].split(',')[1]+','+dividend[0].split(',')[0]:dividend[1]})
-
+        quinella_place_win_configurations[dividend[0]] = dividend[1]
+        quinella_place_win_configurations[dividend[0].split(',')[1]+','+dividend[0].split(',')[0]] = dividend[1]
 
     bet_profits = []
     for bet in quinella_place_bets:
         bet_profit = {"bet_type": "quinella-place", "combination":bet, "amount":quinella_place_bets[bet]}
         if bet in quinella_place_win_configurations:
-            bet_profit["dividend"] = float(quinella_place_win_configurations[bet])
+            bet_profit["dividend"] = float(quinella_place_win_configurations[bet].replace(',',''))
             bet_profit["profit"] = (bet_profit["amount"]/10) * bet_profit["dividend"] - bet_profit["amount"]
         else:
             bet_profit["dividend"] = 0
@@ -165,3 +164,4 @@ def calculate_quinella_place_profits(quinella_place_bets, quinella_place_dividen
 
 if __name__ == "__main__":
   app.run()
+
