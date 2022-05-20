@@ -33,8 +33,7 @@ def return_race_results():
 def home():
     return "<h2>Hello</h2>"
 
-def get_race_results(race_date, race_no):
-    specific_url = RACE_RESULTS_URL + '&RaceDate='+ str(race_date) + '&RaceNo='+str(race_no)
+def create_webdriver():
     options = Options()
     options.add_argument("--headless")
     options.add_argument('--disable-gpu')
@@ -42,6 +41,11 @@ def get_race_results(race_date, race_no):
     options.add_argument('--no-sandbox')
     options.binary_location = GOOGLE_CHROME_BIN
     driver = webdriver.Chrome(executable_path =CHROMEDRIVER_PATH, options=options)
+    return driver
+
+def get_race_results(race_date, race_no):
+    specific_url = RACE_RESULTS_URL + '&RaceDate='+ str(race_date) + '&RaceNo='+str(race_no)
+    driver = create_webdriver()
     driver.get(specific_url)
     try:
         element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "commContent")))
@@ -120,11 +124,16 @@ def extract_dividend_data(table):
     return results_and_dividends
 
 def calculate_profit(results_and_dividends):
-    f = open('bet-list.json')
-    bets = json.load(f)["bets"]
+    bets = get_bet_list()
     quinella_profits = calculate_quinella_profits(bets["qin"], results_and_dividends["quinella"])
     quinella_place_profits = calculate_quinella_place_profits(bets["qpl"], results_and_dividends["quinella-place"])
     return quinella_profits+quinella_place_profits
+
+def get_bet_list():
+    f = open('bet-list.json')
+    bets = json.load(f)["bets"]
+    f.close()
+    return bets
 
 def calculate_quinella_profits(quinella_bets, quinella_dividends):
     quinella_win_configurations = (quinella_dividends[0], quinella_dividends[0].split(',')[1]+','+quinella_dividends[0].split(',')[0])
