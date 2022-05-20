@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import json
 import os
 
-RACE_RESULTS_URL = "https://racing.hkjc.com/racing/information/english/Racing/LocalResults.aspx?Racecourse=HV"
+RACE_RESULTS_URL = "https://racing.hkjc.com/racing/information/english/Racing/LocalResults.aspx?"
 CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
 GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN")
 app = Flask(__name__)
